@@ -15,8 +15,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     DatabaseReference postRef =
         FirebaseDatabase.instance.reference().child('Posts');
+    print('llave de la referencia al post: ' + postRef.key);
     postRef.once().then((DataSnapshot snapshot) {
-      print('estas son las keys: ${snapshot.value.values['date']}');
+      print('estas son las keys: ${snapshot.value}');
       var keys = snapshot.value.keys;
       var data = snapshot.value;
 

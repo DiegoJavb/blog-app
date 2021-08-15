@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PhotoUpload extends StatefulWidget {
   @override
@@ -91,7 +92,9 @@ class _PhotoUploadState extends State<PhotoUpload> {
       var timeKey = DateTime.now();
       firebase_storage.UploadTask uploadTask =
           postImageRef.child(timeKey.toString() + ".jpg").putFile(sampleImage);
+      print('imagen que se subira: ${uploadTask.toString()}');
       var imageUrl = await (await uploadTask).ref.getDownloadURL();
+      print('url de la imagen:  $imageUrl');
       url = imageUrl.toString();
       // Guardar el post a firebase database: database realtime database
       saveToDatabase(url);
@@ -119,7 +122,7 @@ class _PhotoUploadState extends State<PhotoUpload> {
     String date = formatDate.format(dbTimeKey);
     String time = formatTime.format(dbTimeKey);
 
-    DatabaseReference ref = FirebaseDatabase.instance.reference();
+    final DatabaseReference ref = FirebaseDatabase.instance.reference();
     var data = {
       "image": url,
       "description": _myValue,
@@ -127,6 +130,13 @@ class _PhotoUploadState extends State<PhotoUpload> {
       "time": time,
     };
     ref.child('Posts').push().set(data);
+
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final CollectionReference _mainCollection =
+        _firestore.collection('user_photos');
+
+    DocumentReference documentReference = _mainCollection.doc();
+    documentReference.set(data);
   }
 
   bool validateAndSave() {
